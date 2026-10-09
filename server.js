@@ -22,22 +22,26 @@ const ALLOWED_SYMBOLS = new Set([
 app.use(express.json());
 app.use(express.static(path.join(process.cwd(), 'public')));
 
-// Serve index.html from the repository root.
 app.get('/', (_req, res) => {
   res.sendFile(path.join(process.cwd(), 'index.html'));
 });
 
-// Health check.
 app.get('/api/health', (_req, res) => {
   res.json({
     ok: true,
     service: 'signalx-ai-suite',
     mode: 'research',
-    tradingEnabled: false
+    tradingEnabled: false,
+    liveEndpoint: '/live',
+    supportedSymbols: [...ALLOWED_SYMBOLS]
   });
 });
 
-// Request data from Deriv's public WebSocket API.
+function getErrorMessage(error) {
+  return error instanceof Error ? error.message : String(error);
+}
+
+// One-shot public market-data request.
 function derivRequest(payload, timeout = 15000) {
   return new Promise((resolve, reject) => {
     const ws = new WebSocket(DERIV_URL);
@@ -102,7 +106,6 @@ function derivRequest(payload, timeout = 15000) {
   });
 }
 
-// List available Deriv symbols.
 app.get('/api/symbols', async (_req, res) => {
   try {
     const data = await derivRequest({
@@ -114,19 +117,19 @@ app.get('/api/symbols', async (_req, res) => {
     res.json(data);
   } catch (error) {
     res.status(502).json({
-      error: error.message
+      error: getErrorMessage(error)
     });
   }
 });
 
-// Retrieve historical ticks.
 app.get('/api/history', async (req, res) => {
   const symbol = String(req.query.symbol || '1HZ100V');
-  const requestedCount = Number(req.query.count || 1000);
+  const requestedCount = Number(req.query.count || 500);
 
   if (!ALLOWED_SYMBOLS.has(symbol)) {
     return res.status(400).json({
-      error: 'Unsupported symbol.'
+      error: 'Unsupported symbol.',
+      supportedSymbols: [...ALLOWED_SYMBOLS]
     });
   }
 
@@ -137,8 +140,8 @@ app.get('/api/history', async (req, res) => {
   }
 
   const count = Math.min(
-    Math.max(Math.floor(requestedCount), 100),
-    10000
+    Math.max(Math.floor(requestedCount), 1),
+    1000
   );
 
   try {
@@ -153,101 +156,216 @@ app.get('/api/history', async (req, res) => {
     res.json(data);
   } catch (error) {
     res.status(502).json({
-      error: error.message
+      error: getErrorMessage(error)
     });
   }
 });
 
-// Live tick streaming endpoint: /live
-wss.on('connection', client => {
+function sendJSON(client, data) {
+  if (client.readyState === WebSocket.OPEN) {
+    client.send(JSON.stringify(data));
+  }
+}
+
+wss.on('connection', (client, request) => {
   let upstream = null;
+  let currentSymbol = null;
+  let closed = false;
 
-  client.on('message', raw => {
-    let request;
+  function stopFeed() {
+    const oldFeed = upstream;
+    upstream = null;
+    currentSymbol = null;
 
-    try {
-      request = JSON.parse(raw.toString());
-    } catch {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify({
-          error: 'Send a valid JSON message.'
-        }));
-      }
-      return;
+    if (
+      oldFeed &&
+      oldFeed.readyState !== WebSocket.CLOSED
+    ) {
+      oldFeed.close();
     }
+  }
 
-    const symbol = String(request.symbol || '1HZ100V');
+  function startFeed(rawSymbol) {
+    const symbol = String(rawSymbol || '1HZ100V');
 
     if (!ALLOWED_SYMBOLS.has(symbol)) {
-      client.send(JSON.stringify({
-        error: 'Unsupported symbol.'
-      }));
+      sendJSON(client, {
+        type: 'feed_error',
+        error: 'Unsupported symbol.',
+        supportedSymbols: [...ALLOWED_SYMBOLS]
+      });
       return;
     }
 
-    if (upstream) {
-      upstream.close();
-      upstream = null;
+    if (
+      upstream &&
+      currentSymbol === symbol &&
+      upstream.readyState !== WebSocket.CLOSED
+    ) {
+      return;
     }
+
+    stopFeed();
+    currentSymbol = symbol;
 
     const feed = new WebSocket(DERIV_URL);
     upstream = feed;
 
+    sendJSON(client, {
+      type: 'feed_status',
+      status: 'connecting',
+      symbol
+    });
+
     feed.on('open', () => {
-      if (feed !== upstream) return;
+      if (closed || feed !== upstream) return;
+
+      console.log(`Deriv connected; subscribing to ${symbol}`);
 
       feed.send(JSON.stringify({
         ticks: symbol,
         subscribe: 1,
         req_id: 10
-      }));
+      }), error => {
+        if (error && feed === upstream) {
+          sendJSON(client, {
+            type: 'feed_error',
+            error: getErrorMessage(error),
+            symbol
+          });
+        }
+      });
     });
 
     feed.on('message', rawMessage => {
-      if (
-        feed === upstream &&
-        client.readyState === WebSocket.OPEN
-      ) {
-        client.send(rawMessage.toString());
+      if (closed || feed !== upstream) return;
+      if (client.readyState !== WebSocket.OPEN) return;
+
+      let data;
+
+      try {
+        data = JSON.parse(rawMessage.toString());
+      } catch {
+        sendJSON(client, {
+          type: 'feed_error',
+          error: 'Received invalid JSON from Deriv.',
+          symbol
+        });
+        return;
       }
+
+      // Forward subscription errors visibly.
+      if (data.error) {
+        console.error('Deriv subscription error:', data.error);
+
+        sendJSON(client, {
+          type: 'feed_error',
+          error: data.error.message || 'Deriv rejected the request.',
+          code: data.error.code || null,
+          symbol
+        });
+        return;
+      }
+
+      if (data.msg_type === 'tick' && data.tick) {
+        console.log(`Tick ${symbol}: ${data.tick.quote}`);
+
+        // Preserve Deriv's original JSON quote and precision metadata.
+        sendJSON(client, {
+          ...data,
+          type: 'market_tick',
+          symbol
+        });
+        return;
+      }
+
+      // Forward subscription confirmations and other responses.
+      sendJSON(client, {
+        ...data,
+        type: data.msg_type === 'tick' ? 'market_tick' : 'deriv_message',
+        symbol
+      });
     });
 
     feed.on('error', error => {
-      if (
-        feed === upstream &&
-        client.readyState === WebSocket.OPEN
-      ) {
-        client.send(JSON.stringify({
-          error: error.message
-        }));
-      }
+      if (feed !== upstream || closed) return;
+
+      console.error('Deriv WebSocket error:', error.message);
+
+      sendJSON(client, {
+        type: 'feed_error',
+        error: error.message || 'Deriv connection failed.',
+        symbol
+      });
     });
 
-    feed.on('close', () => {
-      if (feed === upstream) upstream = null;
-    });
-  });
+    feed.on('close', (code, reason) => {
+      if (feed !== upstream || closed) return;
 
-  client.on('close', () => {
-    if (upstream) {
-      upstream.close();
       upstream = null;
+      currentSymbol = null;
+
+      console.log(
+        `Deriv feed closed for ${symbol}: ${code} ${reason.toString()}`
+      );
+
+      sendJSON(client, {
+        type: 'feed_status',
+        status: 'disconnected',
+        symbol,
+        code,
+        reason: reason.toString()
+      });
+    });
+  }
+
+  // IMPORTANT FIX:
+  // Read the symbol from /live?symbol=1HZ100V
+  // and start the subscription immediately.
+  const url = new URL(
+    request.url,
+    'http://localhost'
+  );
+
+  const querySymbol = url.searchParams.get('symbol');
+
+  startFeed(querySymbol || '1HZ100V');
+
+  // Also support browsers that send { "symbol": "1HZ100V" }.
+  client.on('message', raw => {
+    let message;
+
+    try {
+      message = JSON.parse(raw.toString());
+    } catch {
+      sendJSON(client, {
+        type: 'feed_error',
+        error: 'Send a valid JSON message.'
+      });
+      return;
+    }
+
+    if (message.symbol) {
+      startFeed(message.symbol);
     }
   });
 
-  client.on('error', () => {
-    if (upstream) upstream.close();
+  client.on('close', () => {
+    closed = true;
+    stopFeed();
+  });
+
+  client.on('error', error => {
+    console.error('Browser WebSocket error:', error.message);
+    closed = true;
+    stopFeed();
   });
 });
 
-// Accept WebSocket upgrades only at /live.
 server.on('upgrade', (request, socket, head) => {
-  const pathname = new URL(
-    request.url,
-    'http://localhost'
-  ).pathname;
+  const url = new URL(request.url, 'http://localhost');
 
-  if (pathname !== '/live') {
+  if (url.pathname !== '/live') {
     socket.destroy();
     return;
   }
@@ -259,4 +377,5 @@ server.on('upgrade', (request, socket, head) => {
 
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`SignalX AI listening on port ${PORT}`);
+  console.log('Trading is disabled; public market-data research only.');
 });
