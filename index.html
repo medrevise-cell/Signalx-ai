@@ -1,30 +1,465 @@
-<!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>SignalX AI</title>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1220">
+<title>SignalX AI — Deriv Toolkit</title>
 <style>
-:root{--bg:#07101d;--panel:#0d1726;--panel2:#101d2f;--line:#203049;--text:#eef5ff;--muted:#91a1b8;--cyan:#29d3ff;--green:#35e69a;--yellow:#ffd166;--red:#ff5577;--purple:#a987ff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px Inter,Arial,sans-serif}.app{display:grid;grid-template-columns:235px 1fr;min-height:100vh}.side{border-right:1px solid var(--line);background:#091321;padding:18px 12px;position:sticky;top:0;height:100vh}.brand{font-size:22px;font-weight:800;padding:8px 10px 20px}.brand b{color:var(--cyan)}.nav{display:grid;gap:5px}.nav button{background:transparent;border:0;color:#b9c5d7;text-align:left;padding:11px 12px;border-radius:9px;cursor:pointer;font-size:14px}.nav button:hover,.nav button.active{background:#14243a;color:#fff}.nav .hot{color:#ff9b55}.main{padding:20px;max-width:1500px;width:100%;margin:auto}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px}.title{font-size:25px;font-weight:800}.subtitle{color:var(--muted);margin-top:5px}.pill{border:1px solid var(--line);padding:8px 12px;border-radius:999px;color:var(--green);background:#0a1b1b}.grid{display:grid;grid-template-columns:1.45fr .9fr;gap:14px}.card{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px}.controls{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:14px}.select,.btn{background:#111f32;border:1px solid #2b405d;color:#fff;border-radius:8px;padding:10px 12px}.btn{cursor:pointer}.btn.primary{background:#116f78;border-color:#1ba8b7}.btn.run{background:#0c7751;border-color:#1abf82}.btn.stop{background:#63243a;border-color:#ad3b5d}.decision{display:flex;align-items:center;justify-content:space-between;gap:14px}.big{font-size:48px;font-weight:900;letter-spacing:-2px}.wait{color:var(--yellow)}.trade{color:var(--green)}.no{color:var(--red)}.stop{color:#ff6f91}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin-top:14px}.stat{background:var(--panel2);border:1px solid var(--line);padding:12px;border-radius:9px}.stat span{display:block;color:var(--muted);font-size:11px;text-transform:uppercase}.stat strong{display:block;margin-top:5px;font-size:19px}.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.metric{padding:12px;background:#0b1523;border:1px solid var(--line);border-radius:9px}.metric label{color:var(--muted);display:block;font-size:11px}.metric b{font-size:20px}.section{margin-top:14px}.section h3{margin:0 0 10px}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:14px}.bars{display:grid;gap:8px}.barrow{display:grid;grid-template-columns:70px 1fr 55px;align-items:center;gap:8px}.bar{height:8px;background:#17253a;border-radius:99px;overflow:hidden}.fill{height:100%;background:linear-gradient(90deg,var(--cyan),var(--purple))}.digits{display:grid;grid-template-columns:repeat(10,1fr);gap:6px}.digit{padding:10px 5px;text-align:center;background:#0b1523;border:1px solid var(--line);border-radius:7px}.digit small{display:block;color:var(--muted)}table{width:100%;border-collapse:collapse}th,td{padding:10px;border-bottom:1px solid var(--line);text-align:left}th{color:var(--muted);font-size:11px;text-transform:uppercase}.tag{padding:4px 7px;border-radius:6px;background:#16263b}.tag.good{color:var(--green)}.tag.wait{color:var(--yellow)}.tag.bad{color:var(--red)}.log{height:160px;overflow:auto;background:#07101a;border-radius:8px;padding:10px;color:#9fb1c8;font:12px monospace}.hidden{display:none}.hero{background:linear-gradient(135deg,#0d1b2e,#10192b);border-color:#263c5c}.large-action{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.feature{min-height:130px}.feature h3{margin-top:0}.feature p{color:var(--muted);line-height:1.5}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.range{height:8px;background:#16243a;border-radius:99px}.range i{display:block;height:100%;width:0;background:var(--green);border-radius:99px}.foot{color:#71839b;font-size:12px;margin-top:14px}@media(max-width:1000px){.app{grid-template-columns:1fr}.side{height:auto;position:relative;border-right:0;border-bottom:1px solid var(--line)}.nav{grid-template-columns:repeat(3,1fr)}.grid,.twocol{grid-template-columns:1fr}.cards{grid-template-columns:1fr 1fr}.stats,.metrics{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.main{padding:12px}.nav{grid-template-columns:repeat(2,1fr)}.cards{grid-template-columns:1fr}.digits{grid-template-columns:repeat(5,1fr)}.big{font-size:38px}}
-</style></head>
-<body><div class="app"><aside class="side"><div class="brand">SIGNALX <b>AI</b></div><div class="nav" id="nav"></div></aside><main class="main"><div class="top"><div><div class="title" id="pageTitle">Dashboard</div><div class="subtitle" id="subtitle">Research-first trading intelligence suite</div></div><div class="pill" id="connection">● BACKEND OFFLINE</div></div><div id="view"></div></main></div>
+:root{color-scheme:dark;--bg:#0b1220;--panel:#121d2d;--line:#25344a;--text:#edf4ff;--muted:#9baec5;--green:#32d69a;--amber:#ffc857;--red:#ff667a;--blue:#66a8ff}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px Arial,sans-serif}
+header{padding:18px 20px;border-bottom:1px solid var(--line);background:#0d1727;position:sticky;top:0;z-index:5}
+.brand{font-size:22px;font-weight:800}.sub{color:var(--muted);font-size:12px;margin-top:5px}
+.status{float:right;color:var(--amber);font-weight:bold;margin-top:5px}
+nav{display:flex;gap:7px;overflow-x:auto;padding:12px 16px;border-bottom:1px solid var(--line)}
+nav button,.btn{border:1px solid var(--line);background:#172438;color:var(--text);padding:10px 13px;border-radius:8px;cursor:pointer;white-space:nowrap}
+nav button.active,.btn.primary{background:#174e46;border-color:#267e6a}
+button:hover{filter:brightness(1.15)}
+main{max-width:1400px;margin:auto;padding:18px}
+h1{font-size:24px;margin:5px 0 8px}h2{font-size:17px;margin:0 0 15px}h3{font-size:14px;margin:0 0 10px}
+p,.muted{color:var(--muted);line-height:1.5}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:18px 0}
+.layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:14px}
+.panel,.metric{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:16px;min-width:0}
+.metric small{color:var(--muted);display:block;margin-bottom:10px}
+.metric strong{font-size:22px;overflow-wrap:anywhere}
+.green{color:var(--green)}.amber{color:var(--amber)}.red{color:var(--red)}
+label{display:block;color:var(--muted);font-size:12px;margin:12px 0 6px}
+input,select{width:100%;padding:11px;background:#0b1524;color:var(--text);border:1px solid var(--line);border-radius:7px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.barrow{display:grid;grid-template-columns:22px 1fr 65px;gap:8px;align-items:center;margin:9px 0}
+.bar{height:10px;border-radius:8px;background:#24354b;overflow:hidden}.bar span{display:block;height:100%;background:var(--green)}
+table{width:100%;border-collapse:collapse}td,th{text-align:left;padding:10px 6px;border-bottom:1px solid var(--line);font-size:12px}
+th{color:var(--muted)}canvas{width:100%;height:180px;display:block}
+.pill{display:inline-block;border:1px solid var(--line);border-radius:20px;padding:5px 9px;font-size:11px;color:var(--muted)}
+.quick{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:14px 0}
+.quick button{white-space:normal;min-height:50px}
+.note{border-left:3px solid var(--amber);padding:9px 12px;background:#211f1b;color:#d9c9a2;line-height:1.5;margin:12px 0}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+#message{color:var(--muted);margin:10px 0;font-size:12px}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.layout{grid-template-columns:1fr}.quick{grid-template-columns:repeat(3,minmax(0,1fr))}header{position:relative}}
+@media(max-width:420px){main{padding:12px}.grid{gap:8px}.metric,.panel{padding:12px}.quick{grid-template-columns:repeat(2,minmax(0,1fr))}.row{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <span class="brand">⚡ SignalX AI</span>
+  <span class="status" id="connection">● CHECKING</span>
+  <div class="sub">DERIV TOOLKIT · Market research and analysis</div>
+</header>
+
+<nav id="nav"></nav>
+
+<main>
+  <div id="page"></div>
+  <div id="message" role="status">Checking backend connection…</div>
+  <p class="muted">Research only. Historical statistics do not predict the next tick. Real-money orders are disabled.</p>
+</main>
+
 <script>
-const navItems=['Dashboard','Bot Builder','Free Bots','Pro Scanner','Strategy Pro','Speedbot','AI Software','Auto Trader','Analysis Tool','Manual Trade','Bulk Trade','Charts','Copy Trade','Risk Calculator','Trade Academy'];
-const nav=document.getElementById('nav'),view=document.getElementById('view');let current='Dashboard';
-navItems.forEach(x=>{let b=document.createElement('button');b.textContent=x;b.onclick=()=>show(x);nav.appendChild(b)});
-let state={symbol:'1HZ100V',count:1000,ticks:[],decision:'NO TRADE',validation:null,drift:null,ws:null};
-const markets=[['1HZ100V','Volatility 100 (1s) Index'],['1HZ75V','Volatility 75 (1s) Index'],['1HZ50V','Volatility 50 (1s) Index'],['1HZ25V','Volatility 25 (1s) Index'],['1HZ10V','Volatility 10 (1s) Index']];
-function shell(title,body){document.getElementById('pageTitle').textContent=title;document.getElementById('subtitle').textContent='Fast research scanner · real-data decision engine';view.innerHTML=body}
-function show(x){current=x;[...nav.children].forEach(b=>b.classList.toggle('active',b.textContent===x)); if(x==='Dashboard')dashboard(); else if(x==='Analysis Tool')analysis(); else if(x==='Pro Scanner')scanner(); else if(x==='Speedbot')speed(); else if(x==='Risk Calculator')risk(); else if(x==='Charts')charts(); else feature(x)}
-function dashboard(){shell('Dashboard',`<div class="grid"><div class="card hero"><h2>SignalX Command Center</h2><p class="subtitle">One workspace for research, strategy validation, automation controls and execution preparation.</p><div class="stats"><div class="stat"><span>Markets</span><strong>5</strong></div><div class="stat"><span>Mode</span><strong>Research</strong></div><div class="stat"><span>Speed</span><strong>FAST</strong></div><div class="stat"><span>Orders</span><strong>0</strong></div></div></div><div class="card"><h3>System</h3><p>Live market data is connected through the SignalX backend. Trading remains disabled until explicitly enabled and authenticated.</p><button class="btn primary" onclick="show('Analysis Tool')">Open Analysis Tool</button></div></div><div class="section cards">${navItems.slice(1).map((n,i)=>`<div class="card feature"><h3>${n}</h3><p>${desc(n)}</p><button class="btn" onclick="show('${n}')">Open</button></div>`).join('')}</div>`)}
-function desc(n){return ({'Bot Builder':'Create rule-based bots from validated strategies.','Free Bots':'Browse research templates and free strategy presets.','Pro Scanner':'Scan multiple markets and rank research candidates.','Strategy Pro':'Backtest, unseen validation and walk-forward analysis.','Speedbot':'Fast decision monitor for live tick conditions.','AI Software':'Explain signals, evidence, risks and invalidation conditions.','Auto Trader':'Controlled automation layer; disabled until authentication and safeguards are enabled.','Analysis Tool':'Detailed Over/Under, Match/Differ, Even/Odd and Rise/Fall research.','Manual Trade':'Prepare and review a trade before execution.','Bulk Trade':'Plan multiple actions with strict risk controls.','Charts':'Real-time and historical price/tick visualisation.','Copy Trade':'Research and monitor strategy-copy workflows.','Risk Calculator':'Stake, payout, break-even, drawdown and losing-streak analysis.','Trade Academy':'Learn probability, validation and disciplined risk management.'}[n]||'SignalX module.')}
-function controls(){return `<div class="controls"><select class="select" id="market">${markets.map(m=>`<option value="${m[0]}" ${state.symbol===m[0]?'selected':''}>${m[1]}</option>`).join('')}</select><select class="select" id="count"><option>1000</option><option>5000</option><option>10000</option></select><button class="btn primary" onclick="loadHistory()">⚡ Scan</button><button class="btn" onclick="startLive()">Start Live</button><button class="btn stop" onclick="stopLive()">Stop</button></div>`}
-function analysis(){shell('Analysis Tool',`${controls()}<div class="grid"><div class="card hero"><div class="decision"><div><div class="subtitle">CURRENT RESEARCH DECISION</div><div id="decision" class="big no">NO TRADE</div><div id="reason" class="subtitle">Waiting for real market data</div></div><div class="pill">FAST</div></div><div class="stats"><div class="stat"><span>Ticks analysed</span><strong id="ticks">0</strong></div><div class="stat"><span>Validation</span><strong id="validation">—</strong></div><div class="stat"><span>Drift</span><strong id="drift">—</strong></div><div class="stat"><span>Risk</span><strong id="risk">—</strong></div></div><div class="section"><h3>⚡ High-Speed Decision</h3><div class="large-action"><button class="btn run" id="runBtn" disabled>RUN BOT</button><button class="btn stop">STOP</button></div><div class="foot">RUN BOT is only enabled after sufficient real data and validated criteria. No order is placed by this research interface.</div></div></div><div class="card"><h3>Market Research</h3><div id="metrics" class="metrics"></div></div></div><div class="section twocol"><div class="card"><h3>Digit Distribution</h3><div id="digits" class="digits"></div></div><div class="card"><h3>Pro Scanner</h3><div id="scanner">Loading...</div></div></div>`);}
-function calc(prices){const ds=prices.map(q=>{let s=String(q);return Number(s.replace(/\D/g,'').slice(-1))}).filter(Number.isFinite);if(!ds.length)return null;let n=ds.length, over=ds.filter(x=>x>4).length/n*100, match=ds.filter((x,i)=>i&&x===ds[i-1]).length/Math.max(1,n-1)*100, odd=ds.filter(x=>x%2).length/n*100, rise=prices.slice(1).filter((q,i)=>q>prices[i]).length/Math.max(1,n-1)*100;let mid=Math.floor(n*.7),a=ds.slice(0,mid),b=ds.slice(mid);let p=x=>x.length?x.filter(v=>v>4).length/x.length*100:0;let validation=100-Math.abs(p(a)-p(b));let drift=Math.abs(p(a)-p(b));let edge=Math.max(Math.abs(over-50),Math.abs(odd-50),Math.abs(rise-50));let decision=(n>=1000&&validation>=96&&edge>=4&&drift<=5)?'RUN BOT':(edge>=2&&validation>=92)?'WAIT':'NO TRADE';return {ds,n,over,under:100-over,match,differ:100-match,odd,even:100-odd,rise,fall:100-rise,validation,drift,edge,decision}}
-async function loadHistory(){state.symbol=document.getElementById('market').value;state.count=Number(document.getElementById('count').value);try{let r=await fetch(`/api/history?symbol=${state.symbol}&count=${state.count}`);let d=await r.json();if(d.error)throw Error(d.error);state.ticks=d.history?.prices||[];renderAnalysis(calc(state.ticks));document.getElementById('connection').textContent='● DERIV DATA CONNECTED';document.getElementById('connection').style.color='var(--green)'}catch(e){document.getElementById('connection').textContent='● BACKEND ERROR';document.getElementById('reason').textContent=e.message}}
-function renderAnalysis(a){if(!a)return;document.getElementById('decision').textContent=a.decision;document.getElementById('decision').className='big '+(a.decision==='RUN BOT'?'trade':a.decision==='WAIT'?'wait':'no');document.getElementById('reason').textContent=a.decision==='RUN BOT'?'Validated research conditions detected.':a.decision==='WAIT'?'Conditions are developing; evidence is insufficient for action.':'No defensible research edge detected.';document.getElementById('ticks').textContent=a.n.toLocaleString();document.getElementById('validation').textContent=a.validation.toFixed(1)+'%';document.getElementById('drift').textContent=a.drift.toFixed(1)+'%';document.getElementById('risk').textContent=a.edge>=6?'HIGH':a.edge>=3?'MEDIUM':'LOW';document.getElementById('runBtn').disabled=a.decision!=='RUN BOT';let vals=[['Over 4',a.over],['Under 4',a.under],['Match',a.match],['Differ',a.differ],['Even',a.even],['Odd',a.odd],['Rise',a.rise],['Fall',a.fall]];document.getElementById('metrics').innerHTML=vals.map(v=>`<div class="metric"><label>${v[0]}</label><b>${v[1].toFixed(1)}%</b></div>`).join('');let c=Array(10).fill(0);a.ds.forEach(x=>c[x]++);document.getElementById('digits').innerHTML=c.map((v,i)=>`<div class="digit"><b>${i}</b><small>${(v/a.n*100).toFixed(1)}%</small></div>`).join('');document.getElementById('scanner').innerHTML=`<table><tr><th>Market</th><th>Signal</th><th>Validation</th><th>Action</th></tr>${markets.map(m=>`<tr><td>${m[1].replace(' Index','')}</td><td>${m[0]===state.symbol?a.decision:'—'}</td><td>${m[0]===state.symbol?a.validation.toFixed(1)+'%':'—'}</td><td><span class="tag ${m[0]===state.symbol?(a.decision==='RUN BOT'?'good':a.decision==='WAIT'?'wait':'bad'):'wait'}">${m[0]===state.symbol?a.decision:'WAIT'}</span></td></tr>`).join('')}</table>`}
-function startLive(){stopLive();state.ws=new WebSocket((location.protocol==='https:'?'wss://':'ws://')+location.host+'/live');state.ws.onopen=()=>state.ws.send(JSON.stringify({symbol:state.symbol}));state.ws.onmessage=e=>{let d=JSON.parse(e.data);if(d.tick){state.ticks.push(d.tick.quote);if(state.ticks.length>10000)state.ticks.shift();let a=calc(state.ticks);if(current==='Analysis Tool')renderAnalysis(a)}};state.ws.onclose=()=>{};}
-function stopLive(){if(state.ws){state.ws.close();state.ws=null}}
-function scanner(){shell('Pro Scanner',`<div class="card hero"><h2>Multi-Market Scanner</h2><p class="subtitle">The scanner ranks markets using the same research engine as Analysis Tool. No fabricated signals.</p><div class="section" id="scannerFull">${markets.map(m=>`<div class="card" style="margin-bottom:8px"><b>${m[1]}</b><span style="float:right" class="tag wait">WAITING FOR DATA</span><div class="range" style="margin-top:12px"><i style="width:0"></i></div></div>`).join('')}</div></div>`)}
-function speed(){shell('Speedbot',`<div class="card hero"><h2>⚡ High-Speed Signal Engine</h2><p class="subtitle">Fast monitoring with strict evidence gates.</p><div class="stats"><div class="stat"><span>Execution speed</span><strong>FAST</strong></div><div class="stat"><span>Mode</span><strong>RESEARCH</strong></div><div class="stat"><span>Orders</span><strong>0</strong></div><div class="stat"><span>Risk guard</span><strong>ON</strong></div></div><div class="section cards"><div class="card feature"><h3>RUN BOT</h3><p>Only enabled after validation criteria are met.</p></div><div class="card feature"><h3>WAIT</h3><p>Conditions are developing but evidence is insufficient.</p></div><div class="card feature"><h3>STOP</h3><p>Stops the research signal when conditions deteriorate.</p></div></div></div>`)}
-function risk(){shell('Risk Calculator',`<div class="cards"><div class="card"><h3>Stake</h3><input class="select" id="stake" type="number" value="10"></div><div class="card"><h3>Payout %</h3><input class="select" id="payout" type="number" value="95"></div><div class="card"><h3>Break-even</h3><strong id="be">51.28%</strong></div></div><div class="section card"><h3>Research Risk</h3><p>Break-even is payout-dependent and does not create a predictive edge. Use it alongside unseen validation, drift and drawdown controls.</p></div>`)}
-function charts(){shell('Charts',`<div class="card"><h2>Live Price / Tick Chart</h2><canvas id="chart" height="330" style="width:100%"></canvas><p class="foot">Connect live data from Analysis Tool to populate the chart.</p></div>`)}
-function feature(x){shell(x,`<div class="card hero"><h2>${x}</h2><p class="subtitle">${desc(x)}</p><div class="section cards"><div class="card feature"><h3>Research Mode</h3><p>Module structure is ready. Real data, validation and risk controls remain the source of truth.</p><button class="btn primary" onclick="show('Analysis Tool')">Open Signal Engine</button></div><div class="card feature"><h3>Safety</h3><p>No fabricated performance. No guaranteed profit. No live order execution from this research layer.</p></div><div class="card feature"><h3>Next integration</h3><p>Authentication, strategy storage, logs, proposals and controlled execution can be connected as separate layers.</p></div></div></div>`)}
-show('Dashboard');
-</script></body></html>
+"use strict";
+
+const markets = [
+  {name:"Volatility 10",symbol:"R_10"},
+  {name:"Volatility 25",symbol:"R_25"},
+  {name:"Volatility 50",symbol:"R_50"},
+  {name:"Volatility 75",symbol:"R_75"},
+  {name:"Volatility 100",symbol:"R_100"},
+  {name:"Volatility 10 (1s)",symbol:"1HZ10V"},
+  {name:"Volatility 25 (1s)",symbol:"1HZ25V"},
+  {name:"Volatility 50 (1s)",symbol:"1HZ50V"},
+  {name:"Volatility 75 (1s)",symbol:"1HZ75V"},
+  {name:"Volatility 100 (1s)",symbol:"1HZ100V"}
+];
+
+const modules = [
+  ["Dashboard","🏠"],["Bot Builder","⚙️"],["Free Bot","🆓"],
+  ["Pro Scanner","📡"],["Strategy Pro","🧪"],["Speed Bot","⚡"],
+  ["AI","🧠"],["Autotrader","🤖"],["Analysis","🔢"],
+  ["Manual","🎯"],["Bulk Trade","📦"],["Chart","📈"],
+  ["Copy Trade","👥"],["Risk Calc","🧮"],["Risk","🛑"]
+];
+
+const state = {
+  page:"Dashboard",
+  symbol:"1HZ10V",
+  ticks:[],
+  quote:null,
+  digit:null,
+  history:[],
+  times:[],
+  socket:null,
+  timer:null,
+  backend:false,
+  wins:0,
+  losses:0,
+  log:[],
+  stake:1,
+  takeProfit:5,
+  stopLoss:3,
+  cooldown:30,
+  maxLosses:3,
+  selectedDigit:5
+};
+
+const $ = id => document.getElementById(id);
+const money = n => "$" + Number(n).toFixed(2);
+const market = () => markets.find(m=>m.symbol===state.symbol) || markets[5];
+
+function say(message){ $("message").textContent=message; }
+
+function esc(value){
+  return String(value).replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  }[c]));
+}
+
+function marketOptions(){
+  return markets.map(m=>`<option value="${m.symbol}" ${m.symbol===state.symbol?"selected":""}>${m.name}</option>`).join("");
+}
+
+function nav(){
+  $("nav").innerHTML=modules.map(([name,emoji])=>
+    `<button class="${state.page===name?"active":""}" data-page="${name}">${emoji} ${name}</button>`
+  ).join("");
+  $("nav").querySelectorAll("button").forEach(b=>{
+    b.addEventListener("click",()=>openPage(b.dataset.page));
+  });
+}
+
+function openPage(name){
+  state.page=name;
+  nav();
+  render();
+}
+
+function metrics(){
+  return `<div class="grid">
+    <div class="metric"><small>RESEARCH STATUS</small><strong class="amber">WAIT</strong></div>
+    <div class="metric"><small>MARKET</small><strong style="font-size:16px">${esc(market().name)}</strong></div>
+    <div class="metric"><small>LATEST QUOTE</small><strong id="quote">${state.quote===null?"—":esc(state.quote)}</strong></div>
+    <div class="metric"><small>LAST OBSERVED DIGIT</small><strong id="digit">${state.digit===null?"—":state.digit}</strong></div>
+  </div>`;
+}
+
+function frequencyPanel(){
+  const counts=Array(10).fill(0);
+  state.ticks.forEach(t=>{if(Number.isInteger(t.digit))counts[t.digit]++});
+  const total=state.ticks.length;
+  return `<section class="panel">
+    <h2>🔢 Observed final-digit frequencies</h2>
+    <p>Based on ${total} received ticks in this session. These are observations, not forecasts.</p>
+    ${counts.map((n,d)=>`<div class="barrow">
+      <strong>${d}</strong><div class="bar"><span style="width:${total?n/total*100:0}%"></span></div>
+      <span>${total?(n/total*100).toFixed(1):"0.0"}%</span>
+    </div>`).join("")}
+  </section>`;
+}
+
+function analysisPanel(){
+  const t=state.ticks;
+  const total=t.length||1;
+  const even=t.filter(x=>x.digit%2===0).length;
+  const under=t.filter(x=>x.digit<5).length;
+  const match=t.filter(x=>x.digit===state.selectedDigit).length;
+  let rises=0,falls=0;
+  for(let i=1;i<t.length;i++){
+    if(t[i].quote>t[i-1].quote)rises++;
+    if(t[i].quote<t[i-1].quote)falls++;
+  }
+  return `<section class="panel">
+    <h2>📊 Observed market analysis</h2>
+    <div class="row">
+      <div><label>Match digit</label><select id="matchDigit">${Array.from({length:10},(_,i)=>`<option ${i===state.selectedDigit?"selected":""}>${i}</option>`).join("")}</select></div>
+      <div><label>Samples</label><input readonly value="${t.length}"></div>
+    </div>
+    <table><thead><tr><th>Measure</th><th>Observed</th><th>Share</th></tr></thead><tbody>
+    <tr><td>Even</td><td>${even}</td><td>${(even/total*100).toFixed(1)}%</td></tr>
+    <tr><td>Odd</td><td>${t.length-even}</td><td>${((t.length-even)/total*100).toFixed(1)}%</td></tr>
+    <tr><td>Under 5 (0–4)</td><td>${under}</td><td>${(under/total*100).toFixed(1)}%</td></tr>
+    <tr><td>5 or above (5–9)</td><td>${t.length-under}</td><td>${((t.length-under)/total*100).toFixed(1)}%</td></tr>
+    <tr><td>Matches digit ${state.selectedDigit}</td><td>${match}</td><td>${(match/total*100).toFixed(1)}%</td></tr>
+    <tr><td>Differs from ${state.selectedDigit}</td><td>${t.length-match}</td><td>${((t.length-match)/total*100).toFixed(1)}%</td></tr>
+    <tr><td>Rise / Fall comparisons</td><td>${rises} / ${falls}</td><td>Not predictive</td></tr>
+    </tbody></table>
+  </section>`;
+}
+
+function dashboard(){
+  return `<h1>Dashboard</h1><p>Monitor the feed and inspect observed market behaviour.</p>
+    ${metrics()}
+    <div class="quick">${modules.slice(1).map(([n,e])=>`<button data-quick="${n}">${e} ${n}</button>`).join("")}</div>
+    <div class="layout">
+      <div>${frequencyPanel()}<section class="panel" style="margin-top:14px">
+        <h2>📈 Recent quote history</h2><canvas id="chart" width="700" height="180"></canvas>
+      </section></div>
+      <div>${analysisPanel()}<section class="panel" style="margin-top:14px">
+        <h2>Session status</h2><p>Backend: <strong id="backendLabel">${state.backend?"Connected":"Checking"}</strong></p>
+        <p>Live ticks received: <strong>${state.ticks.length}</strong></p>
+        <p>Paper results logged: <strong>${state.wins} wins / ${state.losses} losses</strong></p>
+        <span class="pill">REAL ORDERS DISABLED</span>
+      </section></div>
+    </div>`;
+}
+
+function builder(){
+  return `<h1>🧩 Bot Builder</h1><p>Configure a research or paper-trading plan. This page does not place orders.</p>
+  <div class="layout"><section class="panel">
+    <h2>1. Trade parameters</h2>
+    <label>Market</label><select id="market">${marketOptions()}</select>
+    <label>Trade type</label><select id="tradeType">
+      <option>Even / Odd</option><option>Over / Under</option><option>Matches / Differs</option><option>Rise / Fall</option>
+    </select>
+    <div class="row"><div><label>Stake reference ($)</label><input id="stake" type="number" min="0.35" step="0.01" value="${state.stake}"></div>
+    <div><label>Minimum sample size</label><input id="minSamples" type="number" min="10" value="100"></div></div>
+    <h2 style="margin-top:20px">2. Risk controls</h2>
+    <div class="row"><div><label>Take-profit reference ($)</label><input id="tp" type="number" min="0" step="0.01" value="${state.takeProfit}"></div>
+    <div><label>Stop-loss reference ($)</label><input id="sl" type="number" min="0" step="0.01" value="${state.stopLoss}"></div></div>
+    <div class="row"><div><label>Cooldown (seconds)</label><input id="cooldown" type="number" min="0" value="${state.cooldown}"></div>
+    <div><label>Consecutive-loss limit</label><input id="maxLosses" type="number" min="1" value="${state.maxLosses}"></div></div>
+    <div class="note">Safe research setting: fixed stake reference only. No martingale and no automatic order execution.</div>
+    <button class="btn primary" id="saveSettings">Save local settings</button>
+  </section>
+  <section class="panel"><h2>3. Purchase conditions</h2>
+    <p>Wait for sufficient observations before interpreting statistics.</p>
+    <p>Current market: <strong>${esc(market().name)}</strong></p>
+    <p>Available session samples: <strong>${state.ticks.length}</strong></p>
+    <h2>4. Restart conditions</h2>
+    <p>Cooldown: ${state.cooldown}s</p><p>Loss limit: ${state.maxLosses} consecutive losses</p>
+    <div class="note">These are saved planning settings only. The toolkit does not start, purchase, or sell contracts.</div>
+    <span class="pill">PAPER / RESEARCH MODE</span>
+  </section></div>`;
+}
+
+function scanner(){
+  return `<h1>📡 Pro Scanner</h1><p>Inspect live observations for supported markets. A market can fail if the data service does not support it.</p>
+  <section class="panel"><label>Selected market</label><select id="market">${marketOptions()}</select>
+  ${metrics()}${frequencyPanel()}${analysisPanel()}
+  <div class="actions"><button class="btn primary" id="refreshHistory">Refresh historical data</button><button class="btn" id="reconnect">Reconnect live feed</button></div>
+  </section>`;
+}
+
+function manual(){
+  return `<h1>🎯 Manual Research</h1><p>Record your own observations and paper outcomes. No order is placed.</p>
+  ${metrics()}<section class="panel"><h2>Research checklist</h2>
+  <p>Market: ${esc(market().name)} · Received samples: ${state.ticks.length}</p>
+  <p>Current status: <strong class="amber">WAIT — no validated predictive edge assumed</strong></p>
+  <label>Research note</label><input id="researchNote" placeholder="Describe the setup you observed">
+  <div class="actions"><button class="btn" id="logWin">Log paper win</button><button class="btn" id="logLoss">Log paper loss</button><button class="btn" id="saveNote">Save note</button></div>
+  <h2 style="margin-top:20px">Session log</h2><div id="logList">${state.log.length?state.log.map(x=>`<p>${esc(x)}</p>`).join(""):"<p>No results recorded yet.</p>"}</div>
+  </section>`;
+}
+
+function riskCalc(){
+  return `<h1>🧮 Risk Calculator</h1><p>Illustrative budgeting only; this does not calculate or guarantee a contract's probability of winning.</p>
+  <section class="panel"><div class="row">
+  <div><label>Account balance ($)</label><input id="balance" type="number" min="0" value="100"></div>
+  <div><label>Risk budget (%)</label><input id="riskPercent" type="number" min="0" max="100" value="1"></div>
+  </div><div class="actions"><button class="btn primary" id="calculateRisk">Calculate budget</button></div>
+  <h2 id="riskOutput">Risk budget: $1.00</h2><p>Risk limits cannot eliminate trading losses.</p></section>`;
+}
+
+function genericPage(){
+  const descriptions={
+    "Free Bot":"Review fixed-stake paper-bot concepts. Automated purchases are not enabled.",
+    "Strategy Pro":"Compare pre-defined research rules against historical observations.",
+    "Speed Bot":"Inspect tick arrival speed and feed responsiveness. No speed-based order execution.",
+    "AI":"Experimental statistical summaries only. No claim of a validated predictive model.",
+    "Autotrader":"Real-money and automatic order execution are disabled.",
+    "Analysis":"Review digit frequencies and quote changes using received observations.",
+    "Bulk Trade":"Plan hypothetical scenarios without submitting orders.",
+    "Chart":"View the recent quotes received by the live feed.",
+    "Copy Trade":"Educational workspace for documenting strategies; no accounts or trades are copied.",
+    "Risk":"Review risk limits, fixed stake planning and session loss controls."
+  };
+  return `<h1>${esc(state.page)}</h1><section class="panel">
+  <h2>${esc(state.page)} workspace</h2><p>${esc(descriptions[state.page]||"Research tools for market observation.")}</p>
+  ${metrics()}<p>Selected market: ${esc(market().name)}</p>
+  <button class="btn primary" data-go="Pro Scanner">Open market scanner</button>
+  <button class="btn" data-go="Bot Builder">Configure research settings</button>
+  </section>`;
+}
+
+function render(){
+  const p=state.page;
+  $("page").innerHTML =
+    p==="Dashboard"?dashboard():
+    p==="Bot Builder"?builder():
+    p==="Pro Scanner"||p==="Analysis"?scanner():
+    p==="Manual"?manual():
+    p==="Risk Calc"?riskCalc():genericPage();
+  bindPage();
+  drawChart();
+}
+
+function bindPage(){
+  document.querySelectorAll("[data-quick],[data-go]").forEach(b=>{
+    b.addEventListener("click",()=>openPage(b.dataset.quick||b.dataset.go));
+  });
+  document.querySelectorAll("#market").forEach(s=>{
+    s.addEventListener("change",async()=>{
+      state.symbol=s.value;
+      await loadHistory();
+      connectLive();
+      render();
+    });
+  });
+  const md=$("matchDigit");
+  if(md)md.addEventListener("change",()=>{state.selectedDigit=Number(md.value);render()});
+
+  const save=$("saveSettings");
+  if(save)save.addEventListener("click",()=>{
+    state.stake=Math.max(0,Number($("stake").value)||0);
+    state.takeProfit=Math.max(0,Number($("tp").value)||0);
+    state.stopLoss=Math.max(0,Number($("sl").value)||0);
+    state.cooldown=Math.max(0,Number($("cooldown").value)||0);
+    state.maxLosses=Math.max(1,Number($("maxLosses").value)||1);
+    say("Research settings saved for this page session.");
+    render();
+  });
+  const refresh=$("refreshHistory");
+  if(refresh)refresh.addEventListener("click",loadHistory);
+  const reconnect=$("reconnect");
+  if(reconnect)reconnect.addEventListener("click",connectLive);
+  const win=$("logWin");
+  if(win)win.addEventListener("click",()=>logResult("Paper win"));
+  const loss=$("logLoss");
+  if(loss)loss.addEventListener("click",()=>logResult("Paper loss"));
+  const note=$("saveNote");
+  if(note)note.addEventListener("click",()=>{
+    const v=$("researchNote").value.trim();
+    if(v)state.log.unshift("Note: "+v);
+    render();
+  });
+  const calc=$("calculateRisk");
+  if(calc)calc.addEventListener("click",()=>{
+    const balance=Math.max(0,Number($("balance").value)||0);
+    const pct=Math.min(100,Math.max(0,Number($("riskPercent").value)||0));
+    $("riskOutput").textContent="Illustrative risk budget: "+money(balance*pct/100);
+  });
+}
+
+function logResult(result){
+  if(result==="Paper win")state.wins++;
+  else state.losses++;
+  state.log.unshift(new Date().toLocaleTimeString()+" — "+result+" (user logged)");
+  render();
+}
+
+async function checkBackend(){
+  try{
+    const r=await fetch("/api/health",{cache:"no-store"});
+    if(!r.ok)throw new Error("HTTP "+r.status);
+    const data=await r.json();
+    state.backend=!!data.ok;
+    $("connection").textContent=state.backend?"● BACKEND ONLINE":"● BACKEND ISSUE";
+    $("connection").style.color=state.backend?"var(--green)":"var(--red)";
+    const label=$("backendLabel");
+    if(label)label.textContent=state.backend?"Connected":"Unavailable";
+  }catch(e){
+    state.backend=false;
+    $("connection").textContent="● BACKEND OFFLINE";
+    $("connection").style.color="var(--red)";
+    say("Cannot reach /api/health. Check the Render service and server.js.");
+  }
+}
+
+function extractDigit(quote){
+  const s=String(quote);
+  const digits=s.replace(/\D/g,"");
+  return digits.length?Number(digits[digits.length-1]):null;
+}
+
+async function loadHistory(){
+  say("Loading historical data for "+market().name+"…");
+  try{
+    const url="/api/history?symbol="+encodeURIComponent(state.symbol)+"&count=500";
+    const r=await fetch(url,{cache:"no-store"});
+    const data=await r.json();
+    if(!r.ok)throw new Error(data.error||"History request failed");
+    const h=data.history||data;
+    const prices=h.prices||data.prices;
+    const times=h.times||data.times;
+    if(!Array.isArray(prices))throw new Error(data.error||"No prices returned by backend");
+    state.history=prices.map(Number).filter(Number.isFinite);
+    state.times=Array.isArray(times)?times:[];
+    state.ticks=state.history.map(q=>({quote:q,digit:extractDigit(q)})).filter(t=>t.digit!==null);
+    if(state.ticks.length){
+      state.quote=state.ticks[state.ticks.length-1].quote;
+      state.digit=state.ticks[state.ticks.length-1].digit;
+    }
+    say("Historical observations loaded: "+state.ticks.length+".");
+    render();
+  }catch(e){
+    say("History unavailable for "+market().name+": "+e.message);
+  }
+}
+
+function connectLive(){
+  if(state.socket){
+    try{state.socket.close()}catch(e){}
+    state.socket=null;
+  }
+  const scheme=location.protocol==="https:"?"wss:":"ws:";
+  const ws=new WebSocket(scheme+"//"+location.host+"/live?symbol="+encodeURIComponent(state.symbol));
+  state.socket=ws;
+  ws.onopen=()=>say("Live connection opened for "+market().name+". Waiting for ticks…");
+  ws.onmessage=event=>{
+    try{
+      const data=JSON.parse(event.data);
+      if(data.error){say("Live feed error: "+(data.error.message||"unknown error"));return}
+      const tick=data.tick||(data.msg_type==="tick"?data.tick:null);
+      if(!tick||tick.quote===undefined)return;
+      const q=Number(tick.quote);
+      const d=extractDigit(tick.quote);
+      if(!Number.isFinite(q)||d===null)return;
+      state.quote=q;state.digit=d;
+      state.ticks.push({quote:q,digit:d});
+      if(state.ticks.length>1000)state.ticks.shift();
+      if(state.history.length>500)state.history.shift();
+      state.history.push(q);
+      if(state.page==="Dashboard"||state.page==="Pro Scanner"||state.page==="Analysis"||state.page==="Manual")render();
+      else{
+        const quote=$("quote"),digit=$("digit");
+        if(quote)quote.textContent=String(tick.quote);
+        if(digit)digit.textContent=d;
+      }
+    }catch(e){}
+  };
+  ws.onerror=()=>say("Live feed connection failed. Check the /live WebSocket backend.");
+  ws.onclose=()=>{if(state.socket===ws)say("Live feed disconnected. Use Reconnect live feed to try again.")};
+}
+
+function drawChart(){
+  const c=$("chart");
+  if(!c)return;
+  const ctx=c.getContext("2d");
+  const w=c.width,h=c.height;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle="#25344a";ctx.lineWidth=1;
+  for(let i=1;i<5;i++){ctx.beginPath();ctx.moveTo(0,h*i/5);ctx.lineTo(w,h*i/5);ctx.stroke()}
+  const values=state.history.slice(-100);
+  if(values.length<2){
+    ctx.fillStyle="#9baec5";ctx.font="14px Arial";
+    ctx.fillText("Waiting for historical or live quote data…",15,35);return;
+  }
+  const min=Math.min(...values),max=Math.max(...values),range=max-min||1;
+  ctx.strokeStyle="#32d69a";ctx.lineWidth=2;ctx.beginPath();
+  values.forEach((v,i)=>{
+    const x=i*w/(values.length-1);
+    const y=h-12-((v-min)/range)*(h-24);
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+}
+
+nav();
+render();
+checkBackend();
+loadHistory().then(connectLive);
+setInterval(checkBackend,60000);
+</script>
+</body>
+</html>
